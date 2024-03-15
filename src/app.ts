@@ -56,6 +56,45 @@ app.post("/auth/register", async (req, res) => {
   }
 });
 
+app.post("/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!password || !email) {
+    return res.status(402).json({ msg: "email and password are required" });
+  }
+
+  const user = await User.findOne({ email: email });
+
+  if (!user) {
+    return res.status(404).json({ msg: "User not found!!!" });
+  }
+
+  const checkPassword = await bcrypt.compare(password, user.password);
+
+  if (!checkPassword) {
+    return res.status(422).json({ msg: "Password invalid!!!" });
+  }
+
+  try {
+    const secret = process.env.SECRET;
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+      },
+      secret
+    );
+
+    res
+      .status(200)
+      .json({ msg: "Authentication completed successfully", token });
+  } catch (error) {
+    return res.status(500).json({
+      msg: "A server error occurred, please try again later",
+    });
+  }
+});
+
 const dbUser = process.env.DB_USER;
 const dbPassword = process.env.DB_PASS;
 
