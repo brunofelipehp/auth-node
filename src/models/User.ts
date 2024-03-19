@@ -1,4 +1,4 @@
-import { mongoose } from "../src/app";
+const mongoose = require("mongoose");
 
 const User = mongoose.model("User", {
   name: String,
